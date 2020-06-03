@@ -48,6 +48,20 @@ foreach ($type in $ResourceTypes) {
     }
 
     foreach ($resource in $resources) {
-        Write-Verbose "Checking $($resource.Name)"
+        Write-Output "Checking $($resource.ResourceGroupName)/$($resource.Name) ($($resource.ResourceType))"
+
+        switch ($type) {
+            "SqlServer" {
+                $firewallRules = Get-AzSqlServerFirewallRule -ResourceGroupName $resource.ResourceGroupName -ServerName $resource.Name
+                foreach ($rule in $firewallRules) {
+                    if ($rule.StartIpAddress -eq $rule.EndIpAddress) {
+                        Write-Output "$($rule.FirewallRuleName): $($rule.StartIpAddress)"
+                    }
+                    else {
+                        Write-Output "$($rule.FirewallRuleName): $($rule.StartIpAddress) - $($rule.EndIpAddress)"
+                    }
+                }
+            }
+        }
     }
 }
